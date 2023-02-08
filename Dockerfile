@@ -1,5 +1,5 @@
-FROM eclipse-temurin:17-alpine
-MAINTAINER kai.saborowski@googlemail.com
+FROM eclipse-temurin:18-jdk
+MAINTAINER robert.huljak@gmail.com
 
 EXPOSE 8080
 RUN mkdir -p /app/
