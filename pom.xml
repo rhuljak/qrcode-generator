@@ -24,6 +24,7 @@
         <commons-io.version>2.11.0</commons-io.version>
         <jetbrains-annotations.version>23.0.0</jetbrains-annotations.version>
         <project.scm.id>github</project.scm.id>
+        <itext.version>8.0.0-SNAPSHOT</itext.version>
     </properties>
     <scm>
         <developerConnection>scm:git:https://github.com/ksbrwsk/qrcode-generator.git</developerConnection>
@@ -108,10 +109,30 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <!-- iText-->
-        <dependency>
+        <!--<dependency>
             <groupId>com.lowagie</groupId>
             <artifactId>itext</artifactId>
             <version>4.2.2</version>
+        </dependency>-->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>pdftest</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>${itext.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>forms</artifactId>
+            <version>${itext.version}</version>
         </dependency>
     </dependencies>
 
@@ -139,6 +160,17 @@
             <releases>
                 <enabled>false</enabled>
             </releases>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>itext-snapshot</id>
+            <name>iText Repository - snapshots</name>
+            <url>https://repo.itextsupport.com/snapshot</url>
         </repository>
     </repositories>
     <pluginRepositories>
