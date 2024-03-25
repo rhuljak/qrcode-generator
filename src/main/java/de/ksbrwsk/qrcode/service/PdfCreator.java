@@ -224,6 +224,75 @@ public class PdfCreator {
         return pdfName;
     }
 
+    public String getPdfStickFolderSheet(List<FolderStamp> request, Integer startIndex) {
+
+        String fileName = "stitky-adobe-crack.pdf";
+        final String pdfName = "__" + Calendar.getInstance().getTimeInMillis() + ".pdf";
+
+        try {
+
+            if (request != null) {
+                final String pdfFullName = repoPath + pdfName;
+                PdfDocument pdf = new PdfDocument(new PdfWriter(pdfFullName));
+                PdfDocument origPdf = new PdfDocument(new PdfReader(repoPath + fileName));
+                /*int pagesa = (35 / 16);
+                int zvysok = (35 % 16);
+                System.out.println("pagesa "+pagesa);
+                System.out.println("zvysok "+zvysok);*/
+
+                if (null != startIndex && startIndex > 1 && startIndex <= 16) {
+                    //pridaj uvodne preskakovane pozicie
+                    for (int i = 0; i < (startIndex - 1); i++) {
+                        request.add(i, new FolderStamp());
+                    }
+                }
+
+                int pages = request.size() / 16;
+                int zvysokk = request.size() % 16;
+                if (zvysokk > 0) {
+                    pages++;
+                }
+                System.out.println("pages " + pages);
+
+                for (int i = 0; i < pages; i++) {
+                    origPdf.copyPagesTo(
+                            1, origPdf.getNumberOfPages(),
+                            pdf, new PdfPageFormCopier());
+                    renameFields(pdf, "_text");
+
+                }
+
+                renameFields(pdf, "__text");
+                final String REGULAR = fontPath + "arial.ttf";
+                /*FontProgram fontProgram = FontProgramFactory.createFont(REGULAR);
+                PdfFont font = PdfFontFactory.createFont();*/
+                PdfFont font = PdfFontFactory.createFont(REGULAR);
+
+
+                int j = 1;
+                PdfAcroForm form = PdfAcroForm.getAcroForm(pdf, true);
+                for (FolderStamp value : request) {
+                    String aa = "__text" + j;
+                    //System.out.println("--> "+aa);
+                    form.getField(aa)
+                            .setValue(getStampValue(value))
+                            .setReadOnly(Boolean.TRUE)
+                            .setJustification(TextAlignment.LEFT)
+                            .setFontAndSize(font, 12f)
+                    ;
+                    getStampValue(value);
+                    j++;
+                }
+                pdf.close();
+                origPdf.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return pdfName;
+    }
+
     public String getPdfStickAssetsSheet(List<AssetsStamp> request, Integer startIndex) {
 
         String fileName = "stitky-adobe-crack.pdf";
@@ -914,6 +983,141 @@ public class PdfCreator {
         return pdfName;
     }
 
+    /* verze pro rok 2024 */
+    public String getPdfResultsBoard2024(List<StudentResult> request) {
+
+        String fileName = "user-export-agenda.pdf";
+        final String pdfName = "__" + Calendar.getInstance().getTimeInMillis() + ".pdf";
+
+        try {
+
+
+            if (request != null) {
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+                //String dateTimeString = formatter.format(now);
+
+                /*TimeZone zone = TimeZone.getTimeZone("Europe/Prague");
+                DateFormat dtFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                Calendar cal = Calendar.getInstance(zone);
+                Date date = cal.getTime();
+                String strFormat = dtFormat.format(date);
+
+                System.out.println("LocalDateTime : " + dateTimeString);*/
+
+                ZonedDateTime zonedDateTime = now.atZone(ZoneId.systemDefault());
+                String dateTimeString2 = formatter.format(zonedDateTime);
+
+                System.out.println("LocalDateTime : " + dateTimeString2);
+                //UTC+8
+                ZonedDateTime prgDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("Europe/Prague"));
+                System.out.println("Depart : " + formatter.format(prgDateTime));
+
+                final String pdfFullName = repoPath + pdfName;
+                PdfDocument pdf = new PdfDocument(new PdfWriter(pdfFullName));
+                Document document = new Document(pdf, PageSize.A4.rotate(), false);
+
+                final String REGULAR = fontPath + "arial.ttf";
+                PdfFont font = PdfFontFactory.createFont(REGULAR);
+
+                // Creating a table object
+                float[] pointColumnWidths = {50F, 100F, 200F, 150F};
+                //Table table2 = new Table(pointColumnWidths).useAllAvailableWidth();
+                Table table2 = new Table(UnitValue.createPercentArray(12)).useAllAvailableWidth();
+
+                Border b0 = new SolidBorder(ColorConstants.BLACK, 1);
+                Border b1 = new DoubleBorder(ColorConstants.BLACK, 1);
+                Table table22 = new Table(UnitValue.createPercentArray(4)).useAllAvailableWidth();
+                //table2.setBorder(b0);
+
+                Style style = new Style();
+                style.setBorder(new SolidBorder(1));
+                style.setFont(font).setFontColor(ColorConstants.BLACK);
+                style.setBackgroundColor(ColorConstants.YELLOW);
+
+                Style style2 = new Style();
+                style2.setBorder(new SolidBorder(1));
+                style2.setFont(font).setFontColor(ColorConstants.BLACK);
+
+                Style style3 = new Style();
+                style3.setBorder(new SolidBorder(1));
+                style3.setFont(font).setFontColor(ColorConstants.BLACK).setBold();
+
+                Style styleNO = new Style();
+                styleNO.setBorder(new SolidBorder(1));
+                styleNO.setFont(font);
+                styleNO.setBackgroundColor(ColorConstants.YELLOW);
+
+                Style styleNOC = new Style();
+                styleNOC.setBorder(new SolidBorder(1));
+                styleNOC.setFont(font);
+                styleNOC.setBackgroundColor(ColorConstants.LIGHT_GRAY);
+
+                Style styleYES = new Style();
+                styleYES.setBorder(new SolidBorder(1));
+                styleYES.setFont(font);
+                styleYES.setBackgroundColor(ColorConstants.GREEN);
+                table2.addHeaderCell(createCell("Gymnázium Paměti národa, s. r. o. - Výsledky přijímacího řízení 1. kolo", 12, 1, style3));
+                table2.addHeaderCell(createCell("Pořadí", 1, 2, style));
+                table2.addHeaderCell(createCell("ID kód uchazeče", 1, 2, style));
+                table2.addHeaderCell(createCell("Jednotná zkouška (CERMAT)", 4, 1, style));
+                table2.addHeaderCell(createCell("Školní přijímací zkouška", 2, 1, style));
+                //table2.addHeaderCell(createCell("Vysvědčení", 1, 2, style));
+                table2.addHeaderCell(createCell("Součet bodú", 2, 1, style));
+                table2.addHeaderCell(createCell("Výsledek", 1, 2, style));
+                table2.addHeaderCell(createCell("", 1, 2, style));
+
+                table2.addHeaderCell(createCell("MAT", 1, 1, style));
+                table2.addHeaderCell(createCell("ČJ/OČJ", 1, 1, style));
+                table2.addHeaderCell(createCell("Součet", 1, 1, style));
+                table2.addHeaderCell(createCell("Splnil", 1, 1, style));
+                table2.addHeaderCell(createCell("Součet", 1, 1, style));
+                table2.addHeaderCell(createCell("Splnil", 1, 1, style));
+                table2.addHeaderCell(createCell("Celkem", 1, 1, style));
+                table2.addHeaderCell(createCell("Vážený", 1, 1, style));
+
+                int i = 0;
+                List<StudentResult> requestSorted = request.stream().sorted(Comparator.comparingInt(StudentResult::getOrder)).collect(Collectors.toList());
+
+                for (StudentResult value : requestSorted) {
+                    i++;
+
+                    table2.addCell(createCell(String.valueOf(value.getOrder()), 1, 1, style2));
+                    table2.addCell(createCell(value.getRegisterNumber(), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf(value.getJpzMat()), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf(value.getJpzCj()), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf((value.getJpzMat() + value.getJpzCj())), 1, 1, style2));
+                    table2.addCell(createCell(value.getCermatCondition() ? "Ano" : "Ne", 1, 1, value.getCermatCondition() ? styleYES : styleNOC));
+                    table2.addCell(createCell(String.valueOf((value.getMotivation() + value.getInterview() + value.getCreative() + value.getOffSchool())), 1, 1, style2));
+                    table2.addCell(createCell(value.getGpnCondition() ? "Ano" : "Ne", 1, 1, value.getGpnCondition() ? styleYES : styleNOC));
+                    //table2.addCell(createCell(String.valueOf(value.getReportCard()), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf(value.getSum()), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf(value.getNormalizeSum()), 1, 1, style2));
+                    table2.addCell(createCell(value.getAdmitted() == 1 ? "Přijat" : value.getAdmitted() == 2 ? "Nepřijat (K)" : "Nepřijat (P)", 1, 1, value.getAdmitted() == 1 ? styleYES : value.getAdmitted() == 2 ? styleNO : styleNOC));
+                    //table2.addCell(createCell(value.getAdmitted() == 1 ? "Přijat" : "Nepřijat", 1, 1, value.getAdmitted() == 1 ? styleYES : styleNO));
+                    table2.addCell(createCell("", 1, 1, style2));
+                }
+
+                document.add(table2);
+
+                //strankovani do paticky
+                int numberOfPages = pdf.getNumberOfPages();
+                for (int j = 1; j <= numberOfPages; j++) {
+                    // Write aligned text to the specified by parameters point
+                    //document.showTextAligned(new Paragraph(String.format("strana %s z %s   tisk: %s", j, numberOfPages, formatter.format(prgDateTime))).setFontSize(8), 35, 25, j, TextAlignment.LEFT, VerticalAlignment.TOP, 0);
+                    document.showTextAligned(new Paragraph(String.format("Vysvětlivky: Nepřijat (K) - kapacitní důvody; Nepřijat (P) - nesplněné podmínky; tisk: %s  strana %s z %s   ", formatter.format(prgDateTime), j, numberOfPages)).setFontSize(10).setFont(font), 800, 25, j, TextAlignment.RIGHT, VerticalAlignment.TOP, 0);
+                }
+
+                document.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return pdfName;
+    }
+
     private static Cell createCell(String content, int colspan, int rowspan, Style style) {
         Paragraph paragraph = new Paragraph(content)
                 .setFontSize(10).setTextAlignment(TextAlignment.CENTER);
@@ -1022,6 +1226,29 @@ public class PdfCreator {
         }
         if (null != value.getCity() && null != value.getCityPart() && !value.getCityPart().equals(value.getCity())) {
             sb.append(" - " + value.getCityPart());
+        }
+
+        return sb.toString();
+    }
+
+    private String getStampValue(FolderStamp value) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("\n\n\t\t");
+        if (null != value.getFirstName() && !value.getFirstName().isBlank()) {
+            sb.append(value.getFirstName() + " ");
+        }
+        if (null != value.getLastName() && !value.getLastName().isBlank()) {
+            sb.append(value.getLastName());
+        }
+        sb.append("\n\t\t");
+
+        if (null != value.getBirthDate() && !value.getBirthDate().isBlank()) {
+            sb.append(value.getBirthDate());
+        }
+        sb.append("\n\t\t");
+
+        if (null != value.getRegNumber() && !value.getRegNumber().isBlank()) {
+            sb.append(value.getRegNumber());
         }
 
         return sb.toString();

@@ -115,7 +115,7 @@ public class QrCodeRestController {
     public ResponseEntity<AddressStampReponse> processResultsBoard(@RequestBody List<@Valid StudentResult> request,
                                                                    BindingResult bindingResult) {
         return ResponseEntity.ok()
-                .body(new AddressStampReponse(hostname + "/api/files/" + pdfCreator.getPdfResultsBoard(request)));
+                .body(new AddressStampReponse(hostname + "/api/files/" + pdfCreator.getPdfResultsBoard2024(request)));
     }
 
     /**
@@ -134,6 +134,26 @@ public class QrCodeRestController {
 
         return ResponseEntity.ok()
                 .body(new AddressStampReponse(hostname + "/api/files/" + pdfCreator.getPdfStickSheet(request, startIndex)));
+
+
+    }
+
+    /**
+     * Pro generovani stitku na sanony uchazecu
+     */
+    @PostMapping("/api/folder/stamps")
+
+    public ResponseEntity<AddressStampReponse> folderStamps(@Valid @RequestBody List<@Valid FolderStamp> request, @RequestParam Integer startIndex) {
+        //addCommonModelAttributes(model);
+
+        log.info("generate FolderStampList {}", request.size());
+        //QrCodeProcessingResult result = this.qrCodeEncoder.generateQrCodeUrl(qrCodeUrl);
+        //this.addResultModelAttributes(model, result);
+        ;
+        //System.out.println("city: "+request.get(0).getCity());
+
+        return ResponseEntity.ok()
+                .body(new AddressStampReponse(hostname + "/api/files/" + pdfCreator.getPdfStickFolderSheet(request, startIndex)));
 
 
     }
