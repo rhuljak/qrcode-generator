@@ -278,7 +278,7 @@ public class PdfCreator {
                             .setValue(getStampValue(value))
                             .setReadOnly(Boolean.TRUE)
                             .setJustification(TextAlignment.LEFT)
-                            .setFontAndSize(font, 12f)
+                            .setFontAndSize(font, 18f)
                     ;
                     getStampValue(value);
                     j++;
@@ -1060,16 +1060,16 @@ public class PdfCreator {
                 styleYES.setBackgroundColor(ColorConstants.GREEN);
                 table2.addHeaderCell(createCell("Gymnázium Paměti národa, s. r. o. - Výsledky přijímacího řízení 1. kolo", 12, 1, style3));
                 table2.addHeaderCell(createCell("Pořadí", 1, 2, style));
-                table2.addHeaderCell(createCell("ID kód uchazeče", 1, 2, style));
+                table2.addHeaderCell(createCell("Registrační číslo", 1, 2, style));
                 table2.addHeaderCell(createCell("Jednotná zkouška (CERMAT)", 4, 1, style));
                 table2.addHeaderCell(createCell("Školní přijímací zkouška", 2, 1, style));
                 //table2.addHeaderCell(createCell("Vysvědčení", 1, 2, style));
-                table2.addHeaderCell(createCell("Součet bodú", 2, 1, style));
+                table2.addHeaderCell(createCell("Součet bodů", 2, 1, style));
                 table2.addHeaderCell(createCell("Výsledek", 1, 2, style));
                 table2.addHeaderCell(createCell("", 1, 2, style));
 
                 table2.addHeaderCell(createCell("MAT", 1, 1, style));
-                table2.addHeaderCell(createCell("ČJ/OČJ", 1, 1, style));
+                table2.addHeaderCell(createCell("ČJ", 1, 1, style));
                 table2.addHeaderCell(createCell("Součet", 1, 1, style));
                 table2.addHeaderCell(createCell("Splnil", 1, 1, style));
                 table2.addHeaderCell(createCell("Součet", 1, 1, style));
@@ -1080,21 +1080,36 @@ public class PdfCreator {
                 int i = 0;
                 List<StudentResult> requestSorted = request.stream().sorted(Comparator.comparingInt(StudentResult::getOrder)).collect(Collectors.toList());
 
+                //uprava 13.5. - ak je rovnaky pocet bodov, tak dalsie sort kriterium su body za pohovor, primarne tlacime ako prvych tych, ktori su prijati
+                Collections.sort(requestSorted, Comparator.comparingDouble(StudentResult::getAdmitted)
+                        .thenComparing(Comparator.comparingDouble(StudentResult::getNormalizeSum).reversed())
+                        .thenComparing(Comparator.comparingDouble(StudentResult::getInterview).reversed())
+                );
+
+                //tohle je hint na pristi rok - urcovat poradi dle vazeneho prumeru a dalsi podminky, a v tomhle poradi je tisknout na PDF
+                /*Collections.sort(requestSorted, Comparator.comparingDouble(StudentResult::getNormalizeSum).reversed()
+                        .thenComparing(Comparator.comparingDouble(StudentResult::getInterview).reversed())
+                );*/
+
                 for (StudentResult value : requestSorted) {
                     i++;
 
-                    table2.addCell(createCell(String.valueOf(value.getOrder()), 1, 1, style2));
+                    // 13.5. table2.addCell(createCell(String.valueOf(value.getOrder()), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf(i), 1, 1, style2));
+                    //tohle je hint na pristi rok
+                    //table2.addCell(createCell((value.getCermatCondition() && value.getGpnCondition()) ? String.valueOf(i) : "nesplnil", 1, 1, style2));
                     table2.addCell(createCell(value.getRegisterNumber(), 1, 1, style2));
                     table2.addCell(createCell(String.valueOf(value.getJpzMat()), 1, 1, style2));
-                    table2.addCell(createCell(String.valueOf(value.getJpzCj()), 1, 1, style2));
-                    table2.addCell(createCell(String.valueOf((value.getJpzMat() + value.getJpzCj())), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf((value.getJpzCj() == 9999) ? "OČJ" : value.getJpzCj()), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf((value.getJpzCj() == 9999) ? value.getJpzMat() : (value.getJpzMat() + value.getJpzCj())), 1, 1, style2));
                     table2.addCell(createCell(value.getCermatCondition() ? "Ano" : "Ne", 1, 1, value.getCermatCondition() ? styleYES : styleNOC));
-                    table2.addCell(createCell(String.valueOf((value.getMotivation() + value.getInterview() + value.getCreative() + value.getOffSchool())), 1, 1, style2));
+                    table2.addCell(createCell(String.valueOf((value.getMotivation() + value.getInterview() + value.getCreative() + value.getOffSchool() + value.getReportCard())), 1, 1, style2));
                     table2.addCell(createCell(value.getGpnCondition() ? "Ano" : "Ne", 1, 1, value.getGpnCondition() ? styleYES : styleNOC));
                     //table2.addCell(createCell(String.valueOf(value.getReportCard()), 1, 1, style2));
                     table2.addCell(createCell(String.valueOf(value.getSum()), 1, 1, style2));
                     table2.addCell(createCell(String.valueOf(value.getNormalizeSum()), 1, 1, style2));
-                    table2.addCell(createCell(value.getAdmitted() == 1 ? "Přijat" : value.getAdmitted() == 2 ? "Nepřijat (K)" : "Nepřijat (P)", 1, 1, value.getAdmitted() == 1 ? styleYES : value.getAdmitted() == 2 ? styleNO : styleNOC));
+                    table2.addCell(createCell(value.getAdmitted() == 1 ? "Přijat" : value.getAdmitted() == 2 ? "Nepřijat" : "Nepřijat", 1, 1, value.getAdmitted() == 1 ? styleYES : styleNOC));
+                    ///LUBA///table2.addCell(createCell(value.getAdmitted() == 1 ? "Přijat" : value.getAdmitted() == 2 ? "Nepřijat (K)" : "Nepřijat (P)", 1, 1, value.getAdmitted() == 1 ? styleYES : value.getAdmitted() == 2 ? styleNO : styleNOC));
                     //table2.addCell(createCell(value.getAdmitted() == 1 ? "Přijat" : "Nepřijat", 1, 1, value.getAdmitted() == 1 ? styleYES : styleNO));
                     table2.addCell(createCell("", 1, 1, style2));
                 }
@@ -1106,7 +1121,7 @@ public class PdfCreator {
                 for (int j = 1; j <= numberOfPages; j++) {
                     // Write aligned text to the specified by parameters point
                     //document.showTextAligned(new Paragraph(String.format("strana %s z %s   tisk: %s", j, numberOfPages, formatter.format(prgDateTime))).setFontSize(8), 35, 25, j, TextAlignment.LEFT, VerticalAlignment.TOP, 0);
-                    document.showTextAligned(new Paragraph(String.format("Vysvětlivky: Nepřijat (K) - kapacitní důvody; Nepřijat (P) - nesplněné podmínky; tisk: %s  strana %s z %s   ", formatter.format(prgDateTime), j, numberOfPages)).setFontSize(10).setFont(font), 800, 25, j, TextAlignment.RIGHT, VerticalAlignment.TOP, 0);
+                    document.showTextAligned(new Paragraph(String.format("Vysvětlivky: Nepřijat - z důvodu přijetí na více prioritní školu, pro nedostatečnou kapacitu oboru nebo pro nesplnění podmínek př. řízení; tisk: %s  strana %s z %s   ", formatter.format(prgDateTime), j, numberOfPages)).setFontSize(10).setFont(font), 800, 25, j, TextAlignment.RIGHT, VerticalAlignment.TOP, 0);
                 }
 
                 document.close();
@@ -1233,7 +1248,7 @@ public class PdfCreator {
 
     private String getStampValue(FolderStamp value) {
         StringBuffer sb = new StringBuffer();
-        sb.append("\n\n\t\t");
+        sb.append("\n\t\t");
         if (null != value.getFirstName() && !value.getFirstName().isBlank()) {
             sb.append(value.getFirstName() + " ");
         }
