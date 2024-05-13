@@ -1081,6 +1081,7 @@ public class PdfCreator {
                 List<StudentResult> requestSorted = request.stream().sorted(Comparator.comparingInt(StudentResult::getOrder)).collect(Collectors.toList());
 
                 //uprava 13.5. - ak je rovnaky pocet bodov, tak dalsie sort kriterium su body za pohovor, primarne tlacime ako prvych tych, ktori su prijati
+                //sortujem si sam bez ohladu co mi posle FE v poradi
                 Collections.sort(requestSorted, Comparator.comparingDouble(StudentResult::getAdmitted)
                         .thenComparing(Comparator.comparingDouble(StudentResult::getNormalizeSum).reversed())
                         .thenComparing(Comparator.comparingDouble(StudentResult::getInterview).reversed())
